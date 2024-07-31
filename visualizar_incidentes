@@ -1,0 +1,100 @@
+Samuel Rojas
+PD: faltan funciones que obviamente se agregan mas adelante,
+pero actualmente cumple con lo basico lo cual es Una lista de todas las incidencias
+  registrada y nna vista detallada de cada incidencia al hacer tap en un elemento de la lista
+
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+
+class VisualizacionIncidencias extends StatefulWidget {
+  @override
+  _VisualizacionIncidenciasState createState() => _VisualizacionIncidenciasState();
+}
+
+class _VisualizacionIncidenciasState extends State<VisualizacionIncidencias> {
+  List<dynamic> incidencias = [];
+
+  @override
+  void initState() {
+    super.initState();
+    cargarIncidencias();
+  }
+
+  Future<void> cargarIncidencias() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? incidenciasString = prefs.getString('incidencias');
+    if (incidenciasString != null) {
+      setState(() {
+        incidencias = json.decode(incidenciasString);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Visualización de Incidencias'),
+      ),
+      body: ListView.builder(
+        itemCount: incidencias.length,
+        itemBuilder: (context, index) {
+          final incidencia = incidencias[index];
+          return ListTile(
+            title: Text(incidencia['titulo']),
+            subtitle: Text('${incidencia['centroEducativo']} - ${incidencia['fecha']}'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DetalleIncidencia(incidencia: incidencia),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class DetalleIncidencia extends StatelessWidget {
+  final Map<String, dynamic> incidencia;
+
+  DetalleIncidencia({required this.incidencia});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Detalle de Incidencia'),
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Título: ${incidencia['titulo']}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            SizedBox(height: 8),
+            Text('Centro Educativo: ${incidencia['centroEducativo']}'),
+            Text('Regional: ${incidencia['regional']}'),
+            Text('Distrito: ${incidencia['distrito']}'),
+            Text('Fecha: ${incidencia['fecha']}'),
+            SizedBox(height: 16),
+            Text('Descripción:', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(incidencia['descripcion']),
+            SizedBox(height: 16),
+            // Aquí deberías agregar la visualización de la foto
+            Text('Foto: [Implementar visualización de foto]'),
+            SizedBox(height: 16),
+            // Aquí deberías agregar la reproducción del audio
+            Text('Audio: [Implementar reproducción de audio]'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
